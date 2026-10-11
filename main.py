@@ -32,6 +32,9 @@ snake_positions = [(GRID_WIDTH // 2, GRID_HEIGHT // 2)]
 # Set the initial direction of the snake
 snake_direction = (1, 0)
 
+# Set the initial previous direction of the snake
+prev_direction = (1, 0)
+
 # Set the initial speed of the snake (in squares per frame)
 speed = 10
 
@@ -57,16 +60,40 @@ while not game_over:
             game_over = True
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_UP:
-                snake_direction = (0, -1)
+                # Don't allow the snake to turn directly upon itself
+                if prev_direction != (0, 1):
+                    snake_direction = (0, -1)
             elif event.key == pygame.K_DOWN:
-                snake_direction = (0, 1)
+                # Don't allow the snake to turn directly upon itself
+                if prev_direction != (0, -1):
+                    snake_direction = (0, 1)
             elif event.key == pygame.K_LEFT:
-                snake_direction = (-1, 0)
+                # Don't allow the snake to turn directly upon itself
+                if prev_direction != (1, 0):
+                    snake_direction = (-1, 0)
             elif event.key == pygame.K_RIGHT:
-                snake_direction = (1, 0)
+                # Don't allow the snake to turn directly upon itself
+                if prev_direction != (-1, 0):
+                    snake_direction = (1, 0)
 
+    # Update the previous direction of the snake
+    prev_direction = snake_direction
+    
     # Update the snake position
     snake_positions.insert(0, (snake_positions[0][0] + snake_direction[0], snake_positions[0][1] + snake_direction[1]))
+
+    # Check if the snake has collided with the wall or itself
+    if snake_positions[0][0] < 0:
+        snake_positions[0] = (GRID_WIDTH - 1, snake_positions[0][1])
+    elif snake_positions[0][0] >= GRID_WIDTH:
+        snake_positions[0] = (0, snake_positions[0][1])
+    elif snake_positions[0][1] < 0:
+        snake_positions[0] = (snake_positions[0][0], GRID_HEIGHT - 1)
+    elif snake_positions[0][1] >= GRID_HEIGHT:
+        snake_positions[0] = (snake_positions[0][0], 0)
+    elif snake_positions[0] in snake_positions[1:]:
+        game_over = True
+
 
     # Check if the snake has eaten the food
     if snake_positions[0] == food_position:
